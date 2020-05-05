@@ -45,6 +45,7 @@ long Jiffies();
 long ActiveJiffies();
 long ActiveJiffies(int pid);
 long IdleJiffies();
+long getJiffySumByKeys(const std::vector<CPUStates>& keys);
 
 // Processes
 std::string Command(int pid);
