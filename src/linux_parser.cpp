@@ -113,7 +113,9 @@ long LinuxParser::ActiveJiffies(int pid) {
 
 // TODO: Read and return the number of active jiffies for the system
 long LinuxParser::ActiveJiffies() {
-  return getJiffySumByKeys({CPUStates::kUser_, CPUStates::kNice_, CPUStates::kSystem_, CPUStates::kIRQ_, CPUStates::kSoftIRQ_, CPUStates::kSteal_});
+  return getJiffySumByKeys({CPUStates::kUser_, CPUStates::kNice_,
+                            CPUStates::kSystem_, CPUStates::kIRQ_,
+                            CPUStates::kSoftIRQ_, CPUStates::kSteal_});
 }
 
 // TODO: Read and return the number of idle jiffies for the system
@@ -121,12 +123,10 @@ long LinuxParser::IdleJiffies() {
   return getJiffySumByKeys({CPUStates::kIdle_, CPUStates::kIOwait_});
 }
 
-long LinuxParser::getJiffySumByKeys(const std::vector<CPUStates>& keys)
-{
+long LinuxParser::getJiffySumByKeys(const std::vector<CPUStates>& keys) {
   vector<string> jiffies{CpuUtilization()};
   long sum = 0;
-  for (const size_t key : keys)
-  {
+  for (const size_t key : keys) {
     sum += atol(jiffies[key].c_str());
   }
   return sum;
@@ -179,8 +179,23 @@ string LinuxParser::Uid(int pid) {
 }
 
 // TODO: Read and return the user associated with a process
-// REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::User(int pid[[maybe_unused]]) { return string(); }
+string LinuxParser::User(int pid) {
+  const string uid = LinuxParser::Uid(pid);
+  std::ifstream filestream(kPasswordPath);
+  std::string line, username, x, userid;
+  if (filestream.is_open()) {
+    while (std::getline(filestream, line)) {
+      std::replace(line.begin(), line.end(), ':', ' ');
+      std::istringstream linestream(line);
+      while (linestream >> username >> x >> userid) {
+        if (userid == uid) {
+          return username;
+        }
+      }
+    }
+  }
+  return username;
+}
 
 // TODO: Read and return the uptime of a process
 long LinuxParser::UpTime(int pid) {
