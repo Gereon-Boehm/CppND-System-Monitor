@@ -9,7 +9,7 @@ It contains relevant attributes as shown below
 */
 class Process {
  public:
-  Process(int pid, long hertz);
+  Process(int pid);
   int Pid() const;                               // TODO: See src/process.cpp
   std::string User() const;                      // TODO: See src/process.cpp
   std::string Command() const;                   // TODO: See src/process.cpp
@@ -21,7 +21,6 @@ class Process {
   // TODO: Declare any necessary private members
  private:
   int pid;
-  long hertz;
   float starttime;
 };
 

@@ -40,13 +40,13 @@ string LinuxParser::OperatingSystem() {
 }
 
 string LinuxParser::Kernel() {
-  string os, kernel;
+  string os, version, kernel;
   string line;
   std::ifstream stream(kProcDirectory + kVersionFilename);
   if (stream.is_open()) {
     std::getline(stream, line);
     std::istringstream linestream(line);
-    linestream >> os >> kernel;
+    linestream >> os >> version >> kernel;
   }
   return kernel;
 }
@@ -73,11 +73,25 @@ vector<int> LinuxParser::Pids() {
 
 // TODO: Read and return the system memory utilization
 float LinuxParser::MemoryUtilization() {
-  const int totalMemory = ParserHelper::getValueByKey<int>(
-      "MemTotal", kProcDirectory + kMeminfoFilename);
-  const int freeMemory = ParserHelper::getValueByKey<int>(
-      "MemFree", kProcDirectory + kMeminfoFilename);
-  return (totalMemory - freeMemory) / totalMemory;
+  string line;
+  string key, value;
+  float memtotal = 0.0, memfree = 0.0, buffers = 0.0, cached = 0.0, slab = 0.0;
+  std::ifstream memfstream(kProcDirectory+kMeminfoFilename);
+  if(memfstream.is_open()){
+    while(std::getline(memfstream, line)){
+      std::replace(line.begin(), line.end(), ':', ' ');
+      std::istringstream stream(line);
+      stream >> key >> value;
+      if (key == "MemTotal") { memtotal = stof(value); }
+      if (key == "MemFree") { memfree = stof(value); }
+      if (key == "Buffers") { buffers = stof(value); }
+      if (key == "Cached") { cached = stof(value); }
+      if (key == "Slab") { slab = stof(value); }
+      if (memtotal != 0 && memfree != 0 && buffers != 0 && cached != 0 && slab != 0){ break;}
+    };
+    return (memtotal - memfree - buffers - cached - slab)/memtotal;
+  }
+  return 0.0;
 }
 
 // TODO: Read and return the system uptime
@@ -100,15 +114,33 @@ long LinuxParser::ActiveJiffies(int pid) {
   if (filestream.is_open()) {
     std::getline(filestream, line);
     std::istringstream linestream(line);
-    for (size_t i = 1; i <= 15; ++i) {
+    for (size_t i = 0; i <= 14; ++i) {
       linestream >> value;
-      if ((i == 14) || (i == 15)) {
+      if ((i == 13) || (i == 14)) {
         activeJiffies += atol(value.c_str());
       }
     }
   }
-  // std::cout << to_string(activeJiffies) << std::endl;
   return activeJiffies;
+}
+
+// TODO: Read and return the number of active jiffies for a PID
+long LinuxParser::ChildJiffies(int pid) {
+  std::string line, value;
+  long childJiffies = 0;
+  std::ifstream filestream(kProcDirectory + "/" + to_string(pid) +
+                           kStatFilename);
+  if (filestream.is_open()) {
+    std::getline(filestream, line);
+    std::istringstream linestream(line);
+    for (size_t i = 0; i <= 14; ++i) {
+      linestream >> value;
+      if ((i == 15) || (i == 16)) {
+        childJiffies += atol(value.c_str());
+      }
+    }
+  }
+  return childJiffies;
 }
 
 // TODO: Read and return the number of active jiffies for the system

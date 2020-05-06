@@ -22,10 +22,10 @@ Processor& System::Cpu() { cpu_ = Processor(); return cpu_; }
 vector<Process>& System::Processes() {
   processes_.clear();
   const vector<int> pids = LinuxParser::Pids();
-  const long hertz = sysconf(_SC_CLK_TCK);
   for (const auto pid : pids) {
-    processes_.push_back(Process(pid, hertz));
+    processes_.push_back(Process(pid));
   }
+  std::sort(processes_.rbegin(), processes_.rend());
   return processes_;
 }
 

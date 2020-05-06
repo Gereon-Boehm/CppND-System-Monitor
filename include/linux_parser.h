@@ -44,6 +44,7 @@ std::vector<std::string> CpuUtilization();
 long Jiffies();
 long ActiveJiffies();
 long ActiveJiffies(int pid);
+long ChildJiffies(int pid);
 long IdleJiffies();
 long getJiffySumByKeys(const std::vector<CPUStates>& keys);
 
