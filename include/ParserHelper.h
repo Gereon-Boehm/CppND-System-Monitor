@@ -19,6 +19,7 @@ T getValueByKey(const std::string& filter, const std::string& filename) {
         }
       }
     }
+    stream.close();
   }
   return value;
 };
@@ -32,8 +33,10 @@ T getValue(const std::string& filename) {
     std::getline(stream, line);
     std::istringstream linestream(line);
     linestream >> value;
+    stream.close();
   }
   return value;
 };
 }
+
 #endif

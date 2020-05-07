@@ -22,6 +22,6 @@ string Format::ElapsedTime(long seconds) {
 
 string Format::kbToMb(const int kb){
   std::stringstream stream;
-  stream << std::fixed << std::setprecision(2) << (kb / 1000.0);
+  stream << std::fixed << std::setprecision(2) << (kb / 1024.0);
   return stream.str();
 }
